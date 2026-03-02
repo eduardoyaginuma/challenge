@@ -1,0 +1,52 @@
+---
+- name: Operações Dia 2 - PostgreSQL
+  hosts: postgres_servers
+  become: yes
+  vars:
+    backup_dir: /var/backups/postgresql
+    db_name: cashback
+    db_user: cashback_user
+    db_password: "SecurePass123"
+
+  tasks:
+
+    - name: Garantir diretório de backup
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: '0700'
+
+    - name: Backup lógico com pg_dump
+      become_user: postgres
+      command: >
+        pg_dump {{ db_name }}
+        -F c
+        -f {{ backup_dir }}/{{ db_name }}_{{ ansible_date_time.date }}.backup
+
+    - name: Verificar status do PostgreSQL
+      systemd:
+        name: postgresql
+        state: started
+      register: pg_status
+
+    - name: Exibir status
+      debug:
+        var: pg_status.status.ActiveState
+
+    - name: Criar usuário de aplicação
+      become_user: postgres
+      postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        priv: "ALL"
+        state: present
+
+    - name: Verificar replicação
+      become_user: postgres
+      shell: "psql -c 'SELECT * FROM pg_stat_replication;'"
+      register: replication_status
+
+    - debug:
+        var: replication_status.stdout
