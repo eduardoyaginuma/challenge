@@ -9,6 +9,7 @@ O projeto está organizado da seguinte forma:
 * **cashback-architecture/ansible**: Playbook para automação de tarefas críticas (Backup, Restore, Healthcheck).
 * **cashback-architecture/diagrams/arquitetura**: Diagramas de arquitetura e fluxo de dados.
 
+
 ## 📊 Arquitetura Proposta
 
 A solução foi desenhada para operar em ambiente **On-Premises**, garantindo redundância em todos os níveis:
